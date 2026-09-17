@@ -98,7 +98,7 @@
 <!-- HERO -->
 <section id="inicio" class="relative min-h-screen flex items-center overflow-hidden">
   <div class="absolute inset-0">
-    <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=80" alt="Fachada arquitectónica de vidrio y aluminio" class="w-full h-full object-cover">
+    <img src="./img/Galeria/Global.jpeg" alt="Fachada arquitectónica de vidrio y aluminio" class="w-full h-full object-cover">
     <div class="absolute inset-0 bg-gradient-to-r from-[#4a4a4a]/90 via-[#4a4a4a]/70 to-[#4a4a4a]/40"></div>
   </div>
   <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 w-full">
@@ -263,7 +263,7 @@
           <div class="text-xs text-white/60">Aluminio · Vidrio</div>
         </div>
       </div>
-      <p class="mt-4 text-sm text-white/70 max-w-xs">Expertos en acabados modernos para hogares y empresas.(Mas texto) </p>
+      <p class="mt-4 text-sm text-white/70 max-w-xs">Expertos en acabados modernos para hogares y empresas. Desde pequeños detalles residenciales hasta grandes proyectos de construcción, en Globaltecni transformamos tus espacios con soluciones en aluminio y vidrio a tu medida. Calidad, precisión y elegancia en cada trabajo. ¡Contáctanos y cotiza tu proyecto sin compromiso! </p>
     </div>
     <div>
       <h4 class="font-bold text-lg">Contacto</h4>
@@ -426,7 +426,6 @@ const gallery = [
   { src: './img/Galeria/mesas/m1.jpg', cat: 'Mesas', title: '' },
   // --- GRABADOS ---
 { src: './img/Galeria/Grabados/7e044ed1-007d-497b-a078-91b0b6ae2c20.png', cat: 'Grabados', title: 'Grabados en vidrio' },
-  { src: './img/Galeria/Grabados/DSC00508.JPG', cat: 'Grabados', title: '' },
   { src: './img/Galeria/Grabados/DSC00501.JPG', cat: 'Grabados', title: '' },
   { src: './img/Galeria/Grabados/DSC00342.JPG', cat: 'Grabados', title: '' },
   { src: './img/Galeria/Grabados/DSC00164.JPG', cat: 'Grabados', title: '' },
@@ -532,9 +531,13 @@ const galleryEl = document.getElementById('gallery-grid');
 function renderGallery() {
   galleryEl.innerHTML = '';
   
+  // Cambiamos las clases del contenedor para habilitar el scroll horizontal fluido
+  // flex, overflow-x-auto (para el scroll) y snap-x (para que las fotos se centren al soltar el dedo)
+  galleryEl.className = 'mt-12 flex overflow-x-auto gap-4 sm:gap-6 pb-8 snap-x snap-mandatory';
+
   let filtered = [];
 
-  // 1. LÓGICA: 1 foto por categoría en "Todos", o todas las fotos si se elige una categoría
+  // Lógica: 1 foto por categoría en "Todos", o todas las fotos si se elige una categoría
   if (currentFilter === 'Todos') {
     const categoriasVistas = new Set();
     gallery.forEach(item => {
@@ -547,14 +550,13 @@ function renderGallery() {
     filtered = gallery.filter(g => g.cat === currentFilter);
   }
 
-  // 2. RENDERIZADO DE LAS TARJETAS
+  // RENDERIZADO DE LAS TARJETAS
   filtered.forEach(item => {
     const btn = document.createElement('button');
-    // Usamos animate-scale-in en lugar de reveal para asegurar que aparezcan al instante sin depender del scroll
-    btn.className = 'animate-scale-in group relative overflow-hidden rounded-2xl aspect-square shadow-card hover:shadow-elegant transition-shadow text-left cursor-pointer';
+    // Le agregamos 'flex-none', un ancho fijo ('w-[85vw]' para celular, 'sm:w-80' para PC) y 'snap-center'
+    btn.className = 'animate-scale-in group relative overflow-hidden rounded-2xl aspect-square shadow-card hover:shadow-elegant transition-shadow text-left cursor-pointer flex-none w-[85vw] sm:w-80 snap-center';
     btn.onclick = () => openLightbox(item.src, item.title);
     btn.innerHTML = `
-      <!-- 3. LÓGICA DE ERROR: Si falla la ruta de la imagen, ocultamos todo el botón -->
       <img src="${item.src}" alt="${item.title}" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" onerror="this.parentElement.style.display='none'">
       <div class="absolute inset-0 bg-gradient-to-t from-[#4a4a4a]/90 via-[#4a4a4a]/30 to-transparent opacity-70 group-hover:opacity-100 transition-opacity"></div>
       <div class="absolute bottom-0 left-0 right-0 p-6 text-left text-white translate-y-2 group-hover:translate-y-0 transition-transform">
