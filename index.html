@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Global Tecni — Expertos en Aluminio y Vidrio</title>
+<link rel="icon" type="image/png" href="./img/Galeria/LOGO.png">
 <meta name="description" content="Soluciones modernas en aluminio y vidrio para hogares, oficinas y proyectos arquitectónicos. Ventanas, puertas, espejos y más.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -248,7 +249,7 @@
         </div>
       </div>
       <div class="reveal rounded-3xl overflow-hidden shadow-card border border-gray-200 min-h-[400px]">
-        <iframe title="Ubicación Global Tecni" src="https://www.google.com/maps?q=Pio+Bravo+1-38+y+Huaynacapac,+Cuenca,+Ecuador&output=embed" class="w-full h-full min-h-[400px]" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <iframe title="Ubicación Global Tecni" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4089.744803381852!2d-78.99888180635962!3d-2.8933812991582872!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x91cd1901f7e51f65%3A0x6e62a4ce9ac89a8d!2sGlobalTecni!5e0!3m2!1ses!2sec!4v1790362289901!5m2!1ses!2sec" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" class="w-full h-full min-h-[400px]" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
     </div>
   </div>
@@ -302,6 +303,19 @@
   <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white p-2 hover:bg-white/10 rounded-full">
     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
   </button>
+<!-- Botón Izquierda (Anterior) -->
+<button onclick="event.stopPropagation(); changeLightboxImage(-1)" class="absolute left-2 sm:left-8 top-1/2 -translate-y-1/2 text-white hover:text-[#d67a2a] z-[60] p-2 cursor-pointer">
+  <svg class="w-10 h-10 sm:w-14 sm:h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+  </svg>
+</button>
+
+<!-- Botón Derecha (Siguiente) -->
+<button onclick="event.stopPropagation(); changeLightboxImage(1)" class="absolute right-2 sm:right-8 top-1/2 -translate-y-1/2 text-white hover:text-[#d67a2a] z-[60] p-2 cursor-pointer">
+  <svg class="w-10 h-10 sm:w-14 sm:h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+  </svg>
+</button>
   <div class="max-w-5xl w-full animate-scale-in" onclick="event.stopPropagation()">
     <img id="lightbox-img" src="" alt="" class="w-full max-h-[85vh] object-contain rounded-xl">
     <div id="lightbox-caption" class="text-center text-white mt-4 font-semibold text-lg"></div>
@@ -311,16 +325,17 @@
 <script>
 // Data
 const services = [
-  { icon: 'square', title: 'Venta de vidrio y perfiles', desc: 'Amplio catálogo de vidrios y perfiles de aluminio para todo tipo de proyecto.' },
-  { icon: 'door', title: 'Puertas y ventanas de aluminio', desc: 'Diseños modernos, herméticos y duraderos para hogar y oficina.' },
-  { icon: 'bath', title: 'Cabinas', desc: 'Cabinas de baño elegantes con vidrio templado de seguridad.' },
-  { icon: 'layers', title: 'Piel de vidrio', desc: 'Sistemas de muro cortina con instalación profesional.' },
-  { icon: 'shield', title: 'Policarbonato', desc: 'Cubiertas resistentes a impactos y rayos UV.' },
-  { icon: 'sparkles', title: 'Vidrios templados', desc: 'Máxima resistencia y seguridad para cualquier aplicación.' },
-  { icon: 'layers2', title: 'Espejos', desc: 'Espejos para decoración y reparacion de retrovisores.' },
-  { icon: 'wrench', title: 'Biselado y pulido', desc: 'Acabados finos para espejos, mesas y piezas decorativas.' },
-  { icon: 'frame', title: 'Enmarcado de cuadros', desc: 'Enmarcado profesional para cuadros y fotografías.' },
-  { icon: 'hammer', title: 'Mantenimiento', desc: 'Servicio integral con personal especializado.' },
+  { icon: 'square', title: 'Venta de vidrio y perfiles', desc: 'Amplio catálogo de vidrios y perfiles de aluminio para todo tipo de proyecto.', cat: 'Ventanas' },
+  { icon: 'door', title: 'Puertas y ventanas de aluminio', desc: 'Diseños modernos, herméticos y duraderos para hogar y oficina.', cat: 'Puertas' },
+  { icon: 'bath', title: 'Cabinas', desc: 'Cabinas de baño elegantes con vidrio templado de seguridad.', cat: 'Cabinas' },
+  { icon: 'layers', title: 'Piel de vidrio', desc: 'Sistemas de muro cortina con instalación profesional.', cat: 'Todos' },
+  { icon: 'shield', title: 'Policarbonato', desc: 'Cubiertas resistentes a impactos y rayos UV.', cat: 'Todos' },
+  { icon: 'sparkles', title: 'Vidrios templados', desc: 'Máxima resistencia y seguridad para cualquier aplicación.', cat: 'Vidrio templado' },
+  { icon: 'layers2', title: 'Espejos', desc: 'Espejos para decoración y reparacion de retrovisores.', cat: 'Espejos' },
+  { icon: 'wrench', title: 'Biselado y pulido', desc: 'Acabados finos para espejos, mesas y piezas decorativas.', cat: 'Mesas' },
+  { icon: 'frame', title: 'Enmarcado de cuadros', desc: 'Enmarcado profesional para cuadros y fotografías.', cat: 'Enmarcado' },
+  { icon: 'frame', title: 'Vitrales', desc: 'Vitrales para todo tipo de construcción.', cat: 'Vitrales' },
+  { icon: 'hammer', title: 'Mantenimiento', desc: 'Servicio integral con personal especializado.', cat: 'Todos' },
 ];
 
 const svgs = {
@@ -336,6 +351,28 @@ const svgs = {
   frame: '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="m21 3-7 7"/><path d="m3 21 7-7"/></svg>',
   hammer: '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14.5 10.5-5 5"/><path d="m18.5 6.5-2 2"/><path d="m2 22 4-4"/><path d="m22 2-4 4"/><path d="m8 8 10 10"/><path d="M22 16v6h-6"/></svg>',
 };
+
+const servicesGrid = document.getElementById('services-grid');
+servicesGrid.innerHTML = ''; 
+
+services.forEach(s => {
+  const div = document.createElement('div');
+  
+  // Clases con el cursor-pointer y el evento de clic integrado
+  div.className = 'reveal cursor-pointer bg-white p-8 rounded-2xl shadow-card hover:shadow-elegant transition-all text-center group';
+  div.onclick = () => irAGaleria(s.cat);
+  
+  // Inyección del SVG extraído de tu diccionario "svgs"
+  div.innerHTML = `
+    <div class="mx-auto w-14 h-14 bg-[#d67a2a]/10 text-[#d67a2a] rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+       ${svgs[s.icon]}
+    </div>
+    <h3 class="text-xl font-bold text-[#4a4a4a] mb-3">${s.title}</h3>
+    <p class="text-gray-500 text-sm leading-relaxed">${s.desc}</p>
+  `;
+  servicesGrid.appendChild(div);
+});
+
 
 const gallery = [
 // --- ESPEJOS ---
@@ -362,8 +399,8 @@ const gallery = [
   { src: './img/Galeria/Ventanas/VENTANAS MEDERATO 003.JPG', cat: 'Ventanas', title: '' },
   { src: './img/Galeria/Ventanas/VENTANAS MEDERATO 005.JPG', cat: 'Ventanas', title: '' },
   { src: './img/Galeria/Ventanas/VENTANAS MEDERATO 037.JPG', cat: 'Ventanas', title: '' },
-  { src: './img/Galeria/Ventanas/Screenshot_2025-06-30-08-58-14-766_com.android.chrome-edit.jpg', cat: 'Ventanas', title: '' },
-  { src: './img/Galeria/Ventanas/Screenshot_2025-06-30-09-03-09-875_com.android.chrome-edit.jpg', cat: 'Ventanas', title: '' },
+  { src: './img/Galeria/Ventanas/Screenshot_2025-06-30-08-58-14-766_com.facebook.katana-edit.jpg', cat: 'Ventanas', title: '' },
+  { src: './img/Galeria/Ventanas/Screenshot_2025-06-30-09-03-09-875_com.zhiliaoapp.musically-edit.jpg', cat: 'Ventanas', title: '' },
   { src: './img/Galeria/Ventanas/WhatsApp Image 2026-09-08 at 12.19.25 PM.jpeg', cat: 'Ventanas', title: '' },
   { src: './img/Galeria/Ventanas/WhatsApp Image 2026-09-08 at 12.19.25 PM (1).jpeg', cat: 'Ventanas', title: '' },
   { src: './img/Galeria/Ventanas/WhatsApp Image 2026-09-08 at 12.19.25 PM (2).jpeg', cat: 'Ventanas', title: '' },
@@ -379,9 +416,8 @@ const gallery = [
   { src: './img/Galeria/Ventanas/WhatsApp Image 2026-09-08 at 12.19.24 PM (7).jpeg', cat: 'Ventanas', title: '' },
   { src: './img/Galeria/Ventanas/WhatsApp Image 2026-09-08 at 12.19.24 PM (8).jpeg', cat: 'Ventanas', title: '' },
   { src: './img/Galeria/Ventanas/WhatsApp Image 2026-09-08 at 12.19.24 PM (9).jpeg', cat: 'Ventanas', title: '' },
-  { src: './img/Galeria/Ventanas/WhatsApp Image 2026-09-08 at 12.19.24 PM (10).jpeg', cat: 'Ventanas', title: '' },
   // --- CABINAS ---
-  { src: './img/Galeria/Cabinas/2013-07-09 13.30.11.jpg', cat: 'Cabinas', title: 'Cabinas de baño con vidrio o policarbonato' },
+  { src: './img/Galeria/Cabinas/2013-07-09 13.30.11.jpg', cat: 'Cabinas', title: '' },
   { src: './img/Galeria/Cabinas/2013-07-09 13.34.51.jpg', cat: 'Cabinas', title: '' },
   { src: './img/Galeria/Cabinas/2013-07-09 13.46.58.jpg', cat: 'Cabinas', title: '' },
   { src: './img/Galeria/Cabinas/IMG_20130821_133745.jpg', cat: 'Cabinas', title: '' },
@@ -414,7 +450,7 @@ const gallery = [
   { src: './img/Galeria/Cabinas/Imagen 048.jpg', cat: 'Cabinas', title: '' },
 
   // --- MESAS ---
-{ src: './img/Galeria/mesas/WhatsApp Image 2026-09-08 at 1.24.20 PM.jpeg', cat: 'Mesas', title: 'Mesas de vidrio a su gusto' },
+{ src: './img/Galeria/mesas/WhatsApp Image 2026-09-08 at 1.24.20 PM.jpeg', cat: 'Mesas', title: '' },
   { src: './img/Galeria/mesas/WhatsApp Image 2026-09-08 at 1.24.20 PM (1).jpeg', cat: 'Mesas', title: '' },
   { src: './img/Galeria/mesas/WhatsApp Image 2026-09-08 at 1.24.20 PM (2).jpeg', cat: 'Mesas', title: '' },
   { src: './img/Galeria/mesas/WhatsApp Image 2026-09-08 at 1.24.20 PM (3).jpeg', cat: 'Mesas', title: '' },
@@ -431,7 +467,7 @@ const gallery = [
   { src: './img/Galeria/mesas/m2.jpg', cat: 'Mesas', title: '' },
   { src: './img/Galeria/mesas/m1.jpg', cat: 'Mesas', title: '' },
   // --- GRABADOS ---
-{ src: './img/Galeria/Grabados/7e044ed1-007d-497b-a078-91b0b6ae2c20.png', cat: 'Grabados', title: 'Grabados en vidrio' },
+{ src: './img/Galeria/Grabados/7e044ed1-007d-497b-a078-91b0b6ae2c20.png', cat: 'Grabados', title: '' },
   { src: './img/Galeria/Grabados/DSC00501.JPG', cat: 'Grabados', title: '' },
   { src: './img/Galeria/Grabados/DSC00342.JPG', cat: 'Grabados', title: '' },
   { src: './img/Galeria/Grabados/DSC00164.JPG', cat: 'Grabados', title: '' },
@@ -447,20 +483,31 @@ const gallery = [
   { src: './img/Galeria/Grabados/DSC00981.JPG', cat: 'Grabados', title: '' },
   { src: './img/Galeria/Grabados/DSC00979.JPG', cat: 'Grabados', title: '' },
   { src: './img/Galeria/Grabados/DSC00971.JPG', cat: 'Grabados', title: '' },
+    { src: './img/Galeria/Grabados/DSC00514.JPG', cat: 'Grabados', title: '' },
+  { src: './img/Galeria/Grabados/img058.jpg', cat: 'Grabados', title: '' },
+  { src: './img/Galeria/Grabados/img048.jpg', cat: 'Grabados', title: '' },
+  { src: './img/Galeria/Grabados/img047.jpg', cat: 'Grabados', title: '' },
+  { src: './img/Galeria/Grabados/img041.jpg', cat: 'Grabados', title: '' },
+  { src: './img/Galeria/Grabados/DSC01110.JPG', cat: 'Grabados', title: '' },
+  { src: './img/Galeria/Grabados/DSC01073.JPG', cat: 'Grabados', title: '' },
+  { src: './img/Galeria/Grabados/DSC01067.JPG', cat: 'Grabados', title: '' },
+  { src: './img/Galeria/Grabados/DSC00888.JPG', cat: 'Grabados', title: '' },
+  { src: './img/Galeria/Grabados/DSC00887.JPG', cat: 'Grabados', title: '' },
+  { src: './img/Galeria/Grabados/DSC00870.JPG', cat: 'Grabados', title: '' },
   // --- PUERTAS ---  
-  { src: './img/Galeria/Puertas/DSC00514.JPG', cat: 'Puertas', title: 'Vidrio en puertas de todos los tipos y a gusto del cliente ' },
-  { src: './img/Galeria/Puertas/img058.jpg', cat: 'Puertas', title: '' },
-  { src: './img/Galeria/Puertas/img048.jpg', cat: 'Puertas', title: '' },
-  { src: './img/Galeria/Puertas/img047.jpg', cat: 'Puertas', title: '' },
-  { src: './img/Galeria/Puertas/img041.jpg', cat: 'Puertas', title: '' },
-  { src: './img/Galeria/Puertas/DSC01110.JPG', cat: 'Puertas', title: '' },
-  { src: './img/Galeria/Puertas/DSC01073.JPG', cat: 'Puertas', title: '' },
-  { src: './img/Galeria/Puertas/DSC01067.JPG', cat: 'Puertas', title: '' },
-  { src: './img/Galeria/Puertas/DSC00888.JPG', cat: 'Puertas', title: '' },
-  { src: './img/Galeria/Puertas/DSC00887.JPG', cat: 'Puertas', title: '' },
-  { src: './img/Galeria/Puertas/DSC00870.JPG', cat: 'Puertas', title: '' },
+  { src: './img/Galeria/Puertas/puertas.JPG', cat: 'Puertas', title: '' },
+  { src: './img/Galeria/Puertas/puertas2.jpg', cat: 'Puertas', title: '' },
+  { src: './img/Galeria/Puertas/puertas3.jpg', cat: 'Puertas', title: '' },
+  { src: './img/Galeria/Puertas/puertas4.jpg', cat: 'Puertas', title: '' },
+  { src: './img/Galeria/Puertas/puertas5.jpg', cat: 'Puertas', title: '' },
+  { src: './img/Galeria/Puertas/puertas6.JPG', cat: 'Puertas', title: '' },
+  { src: './img/Galeria/Puertas/puertas7.JPG', cat: 'Puertas', title: '' },
+  { src: './img/Galeria/Puertas/puertas8.JPG', cat: 'Puertas', title: '' },
+  { src: './img/Galeria/Puertas/puertas9.JPG', cat: 'Puertas', title: '' },
+  { src: './img/Galeria/Puertas/puertas10.JPG', cat: 'Puertas', title: '' },
+  { src: './img/Galeria/Puertas/puertas11.JPG', cat: 'Puertas', title: '' },
   // --- VITRALES ---
-{ src: './img/Galeria/Vitrales/DSC00288.JPG', cat: 'Vitrales', title: 'Vitrales para cualquier tipo de construcción' },
+{ src: './img/Galeria/Vitrales/DSC00288.JPG', cat: 'Vitrales', title: '' },
   { src: './img/Galeria/Vitrales/DSC00287.JPG', cat: 'Vitrales', title: '' },
   { src: './img/Galeria/Vitrales/DSC00199.JPG', cat: 'Vitrales', title: '' },
   { src: './img/Galeria/Vitrales/VITRAL.jpg', cat: 'Vitrales', title: '' },
@@ -474,10 +521,14 @@ const gallery = [
   { src: './img/Galeria/Vitrales/2013-07-10 11.48.46.jpg', cat: 'Vitrales', title: '' },
   { src: './img/Galeria/Vitrales/b38b86fc-3754-405c-b114-3ebabf951592.png', cat: 'Vitrales', title: '' },
   { src: './img/Galeria/Vitrales/DSC00723.JPG', cat: 'Vitrales', title: '' },
+  // --- Enmarcados ---
+  { src: './img/Galeria/Enmarcados/Enmarcado.jpeg', cat: 'Enmarcado', title: '' },
+  { src: './img/Galeria/Enmarcados/Enmarcado2.jpeg', cat: 'Enmarcado', title: '' },
+  { src: './img/Galeria/Enmarcados/Enmarcado3.jpeg', cat: 'Enmarcado', title: '' },
 ];
 
 
-const categories = ['Todos', 'Ventanas','Mesas', 'Grabados', 'Puertas', 'Espejos', 'Cabinas', 'Vitrales', 'Vidrio templado'];
+const categories = ['Todos', 'Ventanas','Mesas', 'Grabados', 'Puertas', 'Espejos', 'Cabinas', 'Vitrales', 'Vidrio templado','Enmarcado' ];
 
 const stats = [
   { n: 500, suffix: '+', label: 'Proyectos realizados' },
@@ -494,22 +545,7 @@ const aboutItems = [
   'Experiencia en proyectos residenciales y comerciales',
 ];
 
-// Render services
-const servicesGrid = document.getElementById('services-grid');
-services.forEach((s, i) => {
-  const div = document.createElement('div');
-  div.className = 'reveal group relative bg-white rounded-2xl p-8 border border-gray-200 hover:border-[#d67a2a]/40 hover:shadow-elegant transition-all duration-500 hover:-translate-y-1';
-  div.style.transitionDelay = (i * 30) + 'ms';
-  div.innerHTML = `
-    <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-primary opacity-0 group-hover:opacity-10 rounded-bl-[5rem] rounded-tr-2xl transition-opacity"></div>
-    <div class="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center text-white shadow-elegant group-hover:scale-110 transition-transform">
-      ${svgs[s.icon]}
-    </div>
-    <h3 class="mt-6 text-xl font-bold text-[#4a4a4a]">${s.title}</h3>
-    <p class="mt-2 text-gray-500 text-sm leading-relaxed">${s.desc}</p>
-  `;
-  servicesGrid.appendChild(div);
-});
+
 
 // Render about list
 const aboutList = document.getElementById('about-list');
@@ -534,10 +570,12 @@ let currentFilter = 'Todos';
 const filtersEl = document.getElementById('gallery-filters');
 const galleryEl = document.getElementById('gallery-grid');
 
+// NUEVAS VARIABLES PARA CONTROLAR EL SWIPE (DESLIZAMIENTO)
+let fotosActuales = [];
+let indiceActual = 0;
+
 function renderGallery() {
   galleryEl.innerHTML = '';
-  
- 
   galleryEl.className = 'mt-12 flex overflow-x-auto gap-4 sm:gap-6 pb-8 snap-x snap-mandatory';
 
   let filtered = [];
@@ -555,11 +593,17 @@ function renderGallery() {
     filtered = gallery.filter(g => g.cat === currentFilter);
   }
 
+  // Guardamos la lista filtrada para poder navegar entre ellas
+  fotosActuales = filtered;
+
   // RENDERIZADO DE LAS TARJETAS
-  filtered.forEach(item => {
+  fotosActuales.forEach((item, index) => {
     const btn = document.createElement('button');
     btn.className = 'animate-scale-in group relative overflow-hidden rounded-2xl aspect-square shadow-card hover:shadow-elegant transition-shadow text-left cursor-pointer flex-none w-[85vw] sm:w-80 snap-center';
-    btn.onclick = () => openLightbox(item.src, item.title);
+    
+    // CAMBIO CLAVE: Ahora enviamos el "index" (número de foto) en lugar del "src"
+    btn.onclick = () => openLightbox(index);
+    
     btn.innerHTML = `
       <img src="${item.src}" alt="${item.title}" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" onerror="this.parentElement.style.display='none'">
       <div class="absolute inset-0 bg-gradient-to-t from-[#4a4a4a]/90 via-[#4a4a4a]/30 to-transparent opacity-70 group-hover:opacity-100 transition-opacity"></div>
@@ -595,18 +639,63 @@ function renderFilters() {
 
 renderGallery();
 
-// Lightbox
-function openLightbox(src, title) {
-  document.getElementById('lightbox-img').src = src;
-  document.getElementById('lightbox-img').alt = title;
-  document.getElementById('lightbox-caption').textContent = title;
+// --- LIGHTBOX CON NAVEGACIÓN ---
+
+function openLightbox(index) {
+  indiceActual = index;
+  const item = fotosActuales[indiceActual];
+  
+  document.getElementById('lightbox-img').src = item.src;
+  document.getElementById('lightbox-img').alt = item.title;
+  
+  if (document.getElementById('lightbox-caption')) {
+      document.getElementById('lightbox-caption').textContent = item.title;
+  }
+  
   document.getElementById('lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
+
 function closeLightbox() {
   document.getElementById('lightbox').classList.remove('open');
   document.body.style.overflow = '';
 }
+
+function changeLightboxImage(direccion) {
+  indiceActual += direccion;
+  
+  // Ciclo infinito: si pasas la última foto, vuelve a la primera y viceversa
+  if (indiceActual < 0) {
+    indiceActual = fotosActuales.length - 1;
+  } else if (indiceActual >= fotosActuales.length) {
+    indiceActual = 0;
+  }
+  
+  const item = fotosActuales[indiceActual];
+  document.getElementById('lightbox-img').src = item.src;
+  document.getElementById('lightbox-img').alt = item.title;
+  
+  if (document.getElementById('lightbox-caption')) {
+      document.getElementById('lightbox-caption').textContent = item.title;
+  }
+}
+
+// --- DETECTOR DE DESLIZAMIENTO TÁCTIL (SWIPE) PARA CELULARES ---
+let touchstartX = 0;
+let touchendX = 0;
+const lightboxElement = document.getElementById('lightbox');
+
+lightboxElement.addEventListener('touchstart', e => {
+  touchstartX = e.changedTouches[0].screenX;
+});
+
+lightboxElement.addEventListener('touchend', e => {
+  touchendX = e.changedTouches[0].screenX;
+  
+  // Si el usuario desliza el dedo más de 50 píxeles, cambiamos la foto
+  if (touchendX < touchstartX - 50) changeLightboxImage(1);  // Deslizar a la izquierda = Siguiente foto
+  if (touchendX > touchstartX + 50) changeLightboxImage(-1); // Deslizar a la derecha = Foto anterior
+});
 
 // Mobile menu
 const menuBtn = document.getElementById('menu-btn');
@@ -677,6 +766,14 @@ function initCounters() {
   });
 }
 initCounters();
+
+// Función para salto suave (asegúrate de que quede al final del script)
+function irAGaleria(categoria) {
+  currentFilter = categoria;
+  renderFilters();
+  renderGallery();
+  document.getElementById('galeria').scrollIntoView({ behavior: 'smooth' });
+}
 </script>
 
 </body>
