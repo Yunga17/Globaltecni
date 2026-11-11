@@ -374,7 +374,9 @@ services.forEach(s => {
 });
 
 
-const gallery = [
+// LISTA DE RESPALDO. La galería real se lee de galeria.json (lo actualiza la página /admin/).
+// Esta lista solo se usa si galeria.json no se puede leer (sin conexión, o abriendo este archivo sin servidor).
+let gallery = [
 // --- ESPEJOS ---
  { src: './img/Galeria/Espejos/WhatsApp Image 2026-09-08 at 1.19.33 PM.jpeg', cat: 'Espejos', title: '' },
   { src: './img/Galeria/Espejos/WhatsApp Image 2026-09-08 at 1.19.32 PM (2).jpeg', cat: 'Espejos', title: '' },
@@ -528,7 +530,9 @@ const gallery = [
 ];
 
 
-const categories = ['Todos', 'Ventanas','Mesas', 'Grabados', 'Puertas', 'Espejos', 'Cabinas', 'Vitrales', 'Vidrio templado','Enmarcado' ];
+// Orden preferido de las pestañas. Las categorías nuevas (creadas desde /admin/) se agregan solas al final.
+let categories = ['Todos', 'Ventanas','Mesas', 'Grabados', 'Puertas', 'Espejos', 'Cabinas', 'Vitrales', 'Vidrio templado','Enmarcado' ];
+const PREFERRED_ORDER = categories.slice(1);
 
 const stats = [
   { n: 500, suffix: '+', label: 'Proyectos realizados' },
@@ -605,29 +609,37 @@ function renderGallery() {
     btn.onclick = () => openLightbox(index);
     
     btn.innerHTML = `
-      <img src="${item.src}" alt="${item.title}" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" onerror="this.parentElement.style.display='none'">
+      <img src="${escHtml(item.src)}" alt="${escHtml(item.title)}" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" onerror="this.parentElement.style.display='none'">
       <div class="absolute inset-0 bg-gradient-to-t from-[#4a4a4a]/90 via-[#4a4a4a]/30 to-transparent opacity-70 group-hover:opacity-100 transition-opacity"></div>
       <div class="absolute bottom-0 left-0 right-0 p-6 text-left text-white translate-y-2 group-hover:translate-y-0 transition-transform">
-        <span class="inline-block text-xs font-semibold uppercase tracking-widest bg-[#d67a2a]/90 px-2 py-1 rounded">${item.cat}</span>
-        <h3 class="mt-2 text-lg font-bold">${item.title}</h3>
+        <span class="inline-block text-xs font-semibold uppercase tracking-widest bg-[#d67a2a]/90 px-2 py-1 rounded">${escHtml(item.cat)}</span>
+        <h3 class="mt-2 text-lg font-bold">${escHtml(item.title)}</h3>
       </div>
     `;
     galleryEl.appendChild(btn);
   });
 }
 
-// 4. CREACIÓN DE BOTONES DE FILTRO
-categories.forEach(c => {
-  const btn = document.createElement('button');
-  btn.className = `px-5 py-2 rounded-full text-sm font-semibold transition-all ${c === currentFilter ? 'bg-gradient-primary text-white shadow-elegant' : 'bg-white text-gray-800 hover:bg-gray-100'}`;
-  btn.textContent = c;
-  btn.onclick = () => { 
-    currentFilter = c; 
-    renderFilters(); 
-    renderGallery(); 
-  };
-  filtersEl.appendChild(btn);
-});
+// Evita que un nombre con símbolos rompa el HTML (los nombres de categoría ahora vienen de galeria.json)
+function escHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+}
+
+// 4. CREACIÓN DE BOTONES DE FILTRO (se vuelve a llamar cuando llega galeria.json)
+function buildFilters() {
+  filtersEl.innerHTML = '';
+  categories.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = `px-5 py-2 rounded-full text-sm font-semibold transition-all ${c === currentFilter ? 'bg-gradient-primary text-white shadow-elegant' : 'bg-white text-gray-800 hover:bg-gray-100'}`;
+    btn.textContent = c;
+    btn.onclick = () => {
+      currentFilter = c;
+      renderFilters();
+      renderGallery();
+    };
+    filtersEl.appendChild(btn);
+  });
+}
 
 // 5. ACTUALIZACIÓN VISUAL DE LOS BOTONES
 function renderFilters() {
@@ -637,7 +649,45 @@ function renderFilters() {
   });
 }
 
-renderGallery();
+// --- GALERÍA LEÍDA DESDE galeria.json ---
+// La página /admin/ sube las fotos a img/Galeria/<carpeta>/ y las anota en galeria.json.
+// Aquí se lee ese archivo para armar las pestañas y las fotos.
+function applyManifest(data) {
+  if (!data || !Array.isArray(data.categories)) throw new Error('formato inesperado');
+  const list = [];
+  const names = [];
+  data.categories.forEach(c => {
+    if (!c || typeof c.name !== 'string' || typeof c.dir !== 'string' || !Array.isArray(c.files)) return;
+    const files = c.files.filter(f => typeof f === 'string' && f);
+    files.forEach(f => list.push({
+      src: './img/Galeria/' + encodeURIComponent(c.dir) + '/' + encodeURIComponent(f),
+      cat: c.name,
+      title: ''
+    }));
+    if (files.length && !names.includes(c.name)) names.push(c.name);
+  });
+  if (!list.length) throw new Error('galería vacía');
+  gallery = list;
+  categories = ['Todos', ...PREFERRED_ORDER.filter(n => names.includes(n)), ...names.filter(n => !PREFERRED_ORDER.includes(n))];
+  if (!categories.includes(currentFilter)) currentFilter = 'Todos';
+}
+
+async function loadGallery() {
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 5000);
+    // no-cache: el navegador pregunta si cambió, así las fotos nuevas aparecen sin esperar
+    const r = await fetch('galeria.json', { cache: 'no-cache', signal: ctrl.signal });
+    clearTimeout(timer);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    applyManifest(await r.json());
+  } catch (e) {
+    console.warn('Galería: no se pudo leer galeria.json, se usa la lista de respaldo.', e);
+  }
+  buildFilters();
+  renderGallery();
+}
+loadGallery();
 
 // --- LIGHTBOX CON NAVEGACIÓN ---
 
