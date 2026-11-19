@@ -359,6 +359,117 @@ input:focus {
   color: rgba(255, 255, 255, 0.8);
 }
 
+/* Selector Subir / Borrar */
+.modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+}
+.mode {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.8rem 0.5rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: none;
+  color: rgba(255, 255, 255, 0.7);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.mode svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mode[aria-selected='true'] {
+  background: linear-gradient(135deg, var(--orange), var(--orange-glow));
+  color: var(--ink);
+}
+#mode-del[aria-selected='true'] {
+  background: var(--err);
+  color: #fff;
+}
+.mode:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Borrar fotos */
+.btn.danger {
+  border-color: var(--err);
+  color: var(--err);
+}
+.btn.danger:not(:disabled):active {
+  background: var(--err);
+  color: #fff;
+}
+.existing .pick {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #fff;
+  cursor: pointer;
+}
+.existing .pick:disabled {
+  cursor: default;
+}
+.existing .pick[aria-pressed='true'] img,
+.existing .pick[aria-pressed='true'] .noimg {
+  opacity: 0.45;
+}
+.existing .pick[aria-pressed='true']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 3px solid var(--err);
+  pointer-events: none;
+}
+.existing .mark {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: transparent;
+}
+.existing .pick[aria-pressed='true'] .mark {
+  border-color: var(--err);
+  background: var(--err);
+  color: #fff;
+}
+.existing .noimg {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0.4rem;
+  font-size: 0.65rem;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.55);
+  word-break: break-all;
+}
+
 .foot {
   margin-top: auto;
   padding-top: 2.5rem;

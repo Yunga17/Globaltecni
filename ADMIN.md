@@ -13,6 +13,10 @@ Funciona en Android y iPhone, sin instalar nada.
 La foto aparece en la página en 2 o 3 minutos (es lo que tarda GitHub Pages en publicar).
 Las fotos se reducen solas a 1600 px, así que la página no se vuelve pesada. Las nuevas salen primero en su categoría.
 
+**Borrar fotos:** arriba, tocar **Borrar fotos** (para volver a subir, **Subir fotos**). Elegir la categoría; abajo aparecen sus fotos. Tocar las que se quieren quitar (quedan marcadas en rojo),
+tocar **Borrar** y confirmar. Dejan de verse en la página en 2 o 3 minutos. (Siguen guardadas en el historial de GitHub,
+por si hubiera que recuperarlas.) Una foto recién subida aparece con su nombre en vez de la imagen hasta que GitHub Pages la publica.
+
 **Instalarla como app (opcional):** en el celular, menú del navegador → *Agregar a la pantalla de inicio*
 (iPhone: botón compartir → *Agregar a inicio*).
 
@@ -47,6 +51,7 @@ Archivos: `admin/index.html`, `admin/app.js` (pantalla), `admin/github.js` (API 
 
 ## Limitaciones actuales
 
-- Desde `/admin/` solo se **agregan** fotos. Para borrar o mover una, se edita `galeria.json` y se borra el archivo en `img/Galeria/…` desde GitHub.
+- Desde `/admin/` se **agregan** y se **borran** fotos (el borrado también es un solo commit: quita los archivos y los saca de `galeria.json`).
+  Para mover una foto de categoría o cambiar el orden, se edita `galeria.json` desde GitHub.
 - Si se agregan fotos a mano al repositorio (sin `/admin/`), hay que anotarlas también en `galeria.json` para que aparezcan.
 - Hay una foto de prueba (`img/Galeria/Enmarcados/foto-20261110-200949-1.jpg`) que no está en `galeria.json`, por lo que no se muestra. Se puede borrar.

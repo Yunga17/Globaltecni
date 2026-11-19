@@ -96,7 +96,7 @@ export async function connect(c) {
 /** Categorías con su cantidad de fotos: [{ name, dir, count }] */
 export async function listCategories(c) {
   const m = await readManifest(c, c.branch);
-  return m.categories.map((x) => ({ name: x.name, dir: x.dir, count: x.files.length }));
+  return m.categories.map((x) => ({ name: x.name, dir: x.dir, count: x.files.length, files: [...x.files] }));
 }
 
 /**
@@ -143,6 +143,63 @@ export async function addPhotos(c, category, photos) {
     } catch (e) {
       last = e;
       // 409/422: la rama cambió mientras tanto -> se repite todo con la versión nueva
+      if (!(e instanceof GhError) || ![409, 422].includes(e.status)) throw e;
+      await new Promise((r) => setTimeout(r, 900 * (attempt + 1)));
+    }
+  }
+  throw last;
+}
+
+/**
+ * Borra fotos de una categoría: quita los archivos y los saca de galeria.json, todo en un solo commit.
+ *   dir:   carpeta de la categoría dentro de img/Galeria
+ *   files: nombres de archivo a borrar
+ * Las fotos siguen guardadas en el historial de GitHub, por si hay que recuperarlas.
+ */
+export async function deletePhotos(c, dir, files) {
+  const toDelete = new Set(files);
+  let last;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      // 1) Estado actual de la rama
+      const ref = await gh(c, 'GET', `${repoUrl(c)}/git/ref/${refPath(c)}`);
+      const parentSha = ref.object.sha;
+      const parent = await gh(c, 'GET', `${repoUrl(c)}/git/commits/${parentSha}`);
+
+      // 2) galeria.json de ESA versión
+      const manifest = await readManifest(c, parentSha);
+      const cat = manifest.categories.find((x) => x.dir === dir);
+      if (!cat) throw new GhError('Esa categoría ya no existe. Toca "Actualizar" e inténtalo de nuevo.', 0);
+      const before = cat.files.length;
+      cat.files = cat.files.filter((f) => !toDelete.has(f));
+      const removed = before - cat.files.length;
+
+      // 3) Solo se borran los archivos que de verdad están en la carpeta
+      let existing = [];
+      try {
+        const list = await gh(c, 'GET', `${repoUrl(c)}/contents/${PHOTOS_DIR}/${dir.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(parentSha)}`);
+        existing = Array.isArray(list) ? list.filter((x) => x.type === 'file').map((x) => x.name) : [];
+      } catch (e) {
+        if (!(e instanceof GhError && e.status === 404)) throw e;
+      }
+      const tree = existing
+        .filter((f) => toDelete.has(f))
+        .map((f) => ({ path: `${PHOTOS_DIR}/${dir}/${f}`, mode: '100644', type: 'blob', sha: null }));
+      if (!removed && !tree.length) return { name: cat.name, dir: cat.dir, removed: 0 };
+      tree.push({ path: MANIFEST_PATH, mode: '100644', type: 'blob', content: JSON.stringify(manifest, null, 2) + '\n' });
+
+      // 4) Un commit con todo, y se mueve la rama
+      const newTree = await gh(c, 'POST', `${repoUrl(c)}/git/trees`, { base_tree: parent.tree.sha, tree });
+      const n = Math.max(removed, tree.length - 1);
+      const commit = await gh(c, 'POST', `${repoUrl(c)}/git/commits`, {
+        message: `Borrar ${n === 1 ? 'foto' : n + ' fotos'} de ${cat.name}`,
+        tree: newTree.sha,
+        parents: [parentSha],
+      });
+      await gh(c, 'PATCH', `${repoUrl(c)}/git/refs/${refPath(c)}`, { sha: commit.sha, force: false });
+      return { name: cat.name, dir: cat.dir, removed: n };
+    } catch (e) {
+      last = e;
       if (!(e instanceof GhError) || ![409, 422].includes(e.status)) throw e;
       await new Promise((r) => setTimeout(r, 900 * (attempt + 1)));
     }

@@ -72,6 +72,17 @@
 
       <!-- Subir fotos -->
       <main id="view-main" class="stack big" hidden>
+        <div class="modes" role="tablist" aria-label="¿Qué quieres hacer?">
+          <button id="mode-up" class="mode" type="button" role="tab" aria-selected="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16" /></svg>
+            Subir fotos
+          </button>
+          <button id="mode-del" class="mode" type="button" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 13h12l1-13M9 7V4h6v3" /></svg>
+            Borrar fotos
+          </button>
+        </div>
+
         <section aria-labelledby="paso1">
           <div class="row">
             <h2 id="paso1"><span class="num">1</span>Categoría</h2>
@@ -84,7 +95,9 @@
           <p id="cat-summary" class="hint"></p>
         </section>
 
-        <section aria-labelledby="paso2">
+        <p id="del-hint" class="hint" hidden>Elige una categoría para ver sus fotos.</p>
+
+        <section id="sec-photos" aria-labelledby="paso2">
           <h2 id="paso2"><span class="num">2</span>Fotos</h2>
           <div class="two">
             <button id="btn-camera" class="btn ghost" type="button">
@@ -102,9 +115,18 @@
           <p id="previews-hint" class="hint">Puedes elegir varias fotos a la vez desde la galería.</p>
         </section>
 
-        <section>
+        <section id="sec-upload">
           <button id="btn-upload" class="btn primary" type="button" disabled>Subir</button>
           <p class="hint center">Las fotos se reducen automáticamente para que la página cargue rápido.</p>
+        </section>
+
+        <!-- Borrar fotos de la categoría elegida -->
+        <section id="manage" aria-labelledby="paso3" hidden>
+          <h2 id="paso3"><span class="num">2</span>Fotos en <span id="manage-cat"></span></h2>
+          <p class="hint">Toca las fotos que quieras quitar de la página y luego <b>Borrar</b>.</p>
+          <ul id="existing" class="previews existing"></ul>
+          <p id="existing-empty" class="hint" hidden>Esta categoría no tiene fotos.</p>
+          <button id="btn-delete" class="btn danger mt" type="button" disabled>Borrar</button>
         </section>
       </main>
 

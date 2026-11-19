@@ -1,4 +1,4 @@
-import { addPhotos, connect, friendly, listCategories } from './github.js';
+import { addPhotos, connect, deletePhotos, friendly, listCategories } from './github.js';
 import { folderName, photoName, prepare } from './image.js';
 
 const $ = (id) => document.getElementById(id);
@@ -38,6 +38,9 @@ let cats = null; // [{ name, dir, count }]
 let selected = null; // dir de la categoría elegida, o 'NEW'
 let photos = []; // fotos preparadas, pendientes de subir
 let busy = null; // texto mientras trabaja
+let marked = new Set(); // fotos de la categoría elegida marcadas para borrar
+let deleting = false;
+let mode = 'up'; // 'up' = subir fotos, 'del' = borrar fotos
 
 /* ───── Avisos ───── */
 function notice(kind, text) {
@@ -75,10 +78,34 @@ function show() {
     $('f-branch').value = d.branch;
     $('repo-hint').textContent = d.repo;
   } else {
+    renderMode();
     renderChips();
     renderPreviews();
   }
 }
+
+/* ───── Modo: Subir fotos / Borrar fotos ───── */
+function renderMode() {
+  const working = !!busy || deleting;
+  for (const [id, m] of [['mode-up', 'up'], ['mode-del', 'del']]) {
+    $(id).setAttribute('aria-selected', String(mode === m));
+    $(id).disabled = working && mode !== m;
+  }
+  $('sec-photos').hidden = mode !== 'up';
+  $('sec-upload').hidden = mode !== 'up';
+}
+
+function setMode(m) {
+  if (m === mode || busy || deleting) return;
+  mode = m;
+  if (mode === 'del' && selected === 'NEW') selected = null;
+  marked = new Set();
+  notice('', '');
+  renderMode();
+  renderChips();
+}
+$('mode-up').addEventListener('click', () => setMode('up'));
+$('mode-del').addEventListener('click', () => setMode('del'));
 
 /* ───── Conexión ───── */
 $('view-setup').addEventListener('submit', async (e) => {
@@ -116,6 +143,7 @@ $('btn-logout').addEventListener('click', () => {
   cfg = null;
   cats = null;
   selected = null;
+  marked = new Set();
   notice('', '');
   show();
 });
@@ -160,16 +188,125 @@ function renderChips() {
       s.className = 'skel';
       wrap.append(s);
     }
+    renderExisting();
     return;
   }
   for (const c of cats) {
-    wrap.append(chip(c.name, c.count, selected === c.dir, '', () => { selected = c.dir; renderChips(); }));
+    wrap.append(chip(c.name, c.count, selected === c.dir, '', () => { selectCategory(c.dir); }));
   }
-  wrap.append(chip('+ Nueva categoría', null, selected === 'NEW', 'new', () => { selected = 'NEW'; renderChips(); $('f-newcat').focus(); }));
-  $('f-newcat').hidden = selected !== 'NEW';
+  if (mode === 'up') {
+    wrap.append(chip('+ Nueva categoría', null, selected === 'NEW', 'new', () => { selectCategory('NEW'); $('f-newcat').focus(); }));
+  }
+  $('f-newcat').hidden = selected !== 'NEW' || mode !== 'up';
   const total = cats.reduce((a, c) => a + c.count, 0);
   $('cat-summary').textContent = cats.length ? `${cats.length} categorías · ${total} fotos en la galería` : '';
+  renderExisting();
 }
+
+function selectCategory(dir) {
+  if (deleting) return;
+  if (dir !== selected) marked = new Set();
+  selected = dir;
+  renderChips();
+}
+
+/* ───── Borrar fotos ───── */
+const photoUrl = (dir, file) => `../img/Galeria/${dir.split('/').map(encodeURIComponent).join('/')}/${encodeURIComponent(file)}`;
+
+function renderExisting() {
+  const cat = cats && selected && selected !== 'NEW' ? cats.find((c) => c.dir === selected) : null;
+  const visible = !!cat && mode === 'del';
+  $('manage').hidden = !visible;
+  $('del-hint').hidden = !(mode === 'del' && cats && !cat);
+  renderMode();
+  const list = $('existing');
+  if (!visible) {
+    list.replaceChildren();
+    delete list.dataset.key;
+    return;
+  }
+  $('manage-cat').textContent = cat.name;
+  // Solo se recrean las miniaturas si cambió la categoría o la lista (así no se recargan las fotos al marcar)
+  const key = cat.dir + '\n' + cat.files.join('\n');
+  if (list.dataset.key !== key) {
+    list.dataset.key = key;
+    list.replaceChildren();
+    for (const f of cat.files) {
+      const li = document.createElement('li');
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pick';
+      b.dataset.file = f;
+      b.setAttribute('aria-label', `Marcar para borrar: ${f}`);
+      const img = document.createElement('img');
+      img.src = photoUrl(cat.dir, f);
+      img.alt = '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      // Una foto recién subida tarda unos minutos en publicarse: mientras, se muestra su nombre
+      img.addEventListener('error', () => {
+        const s = document.createElement('span');
+        s.className = 'noimg';
+        s.textContent = f;
+        img.replaceWith(s);
+      });
+      const mark = document.createElement('span');
+      mark.className = 'mark';
+      mark.setAttribute('aria-hidden', 'true');
+      mark.textContent = '✓';
+      b.append(img, mark);
+      b.addEventListener('click', () => {
+        if (deleting || busy) return;
+        if (marked.has(f)) marked.delete(f);
+        else marked.add(f);
+        renderExisting();
+      });
+      li.append(b);
+      list.append(li);
+    }
+  }
+  for (const f of [...marked]) if (!cat.files.includes(f)) marked.delete(f);
+  for (const b of list.querySelectorAll('.pick')) {
+    const on = marked.has(b.dataset.file);
+    b.setAttribute('aria-pressed', String(on));
+    b.disabled = deleting || !!busy;
+  }
+  $('existing-empty').hidden = cat.files.length > 0;
+  const del = $('btn-delete');
+  del.hidden = cat.files.length === 0;
+  del.disabled = deleting || !!busy || marked.size === 0;
+  del.classList.toggle('busy', deleting);
+  del.textContent = deleting ? 'Borrando…' : marked.size ? `Borrar ${marked.size} ${marked.size === 1 ? 'foto' : 'fotos'}` : 'Borrar';
+}
+
+$('btn-delete').addEventListener('click', async () => {
+  const cat = cats && cats.find((c) => c.dir === selected);
+  if (!cat || !marked.size || deleting || busy) return;
+  const n = marked.size;
+  const ok = window.confirm(
+    `¿Borrar ${n === 1 ? 'esta foto' : 'estas ' + n + ' fotos'} de "${cat.name}"?\n\nDejará${n === 1 ? '' : 'n'} de verse en la página en 2 o 3 minutos.`,
+  );
+  if (!ok) return;
+  notice('', '');
+  deleting = true;
+  renderExisting();
+  renderPreviews();
+  try {
+    const done = await deletePhotos(cfg, cat.dir, [...marked]);
+    marked = new Set();
+    notice('ok', done.removed
+      ? `${done.removed === 1 ? 'Foto borrada' : done.removed + ' fotos borradas'} de "${done.name}". Dejará${done.removed === 1 ? '' : 'n'} de verse en la página en 2 o 3 minutos.`
+      : 'Esas fotos ya no estaban en la galería.');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    deleting = false;
+    refresh();
+  } catch (err) {
+    deleting = false;
+    renderExisting();
+    renderPreviews();
+    fail(err);
+  }
+});
 
 /** Categoría elegida (o nueva). Devuelve { name, dir } o null si falta algo. */
 function resolveCategory() {
@@ -230,7 +367,8 @@ function renderPreviews() {
   }
   $('previews-hint').hidden = photos.length > 0;
   const up = $('btn-upload');
-  up.disabled = !!busy || photos.length === 0;
+  up.disabled = !!busy || deleting || photos.length === 0;
+  if (cats) renderExisting();
   up.classList.toggle('busy', !!busy);
   up.textContent = busy || (photos.length ? `Subir ${photos.length} ${photos.length === 1 ? 'foto' : 'fotos'}` : 'Subir');
 }
