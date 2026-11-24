@@ -6,7 +6,7 @@
 //  3. Una acción programada de GitHub (.github/workflows/recordatorios.yml) la descifra a esas horas
 //     y envía la notificación. Solo esa acción tiene la clave para descifrar.
 
-import { removeDevice, saveDevice } from './github.js';
+import { removeDevice, saveDevice } from './github.js?v=20261124';
 
 const VAPID_PUBLIC = 'BKrppfj3DPRxQAGHu_fL1EA5rTg1D7sNRWpHB3TRWTtOGGEpO2v-xEUX6y-o5jjnK5sD7B8HC-uknvPyQnCMIY8';
 const RSA_PUBLIC =

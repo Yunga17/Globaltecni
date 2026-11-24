@@ -1,6 +1,6 @@
-import { addPhotos, connect, deletePhotos, friendly, listCategories } from './github.js';
-import { folderName, photoName, prepare } from './image.js';
-import { initReminders } from './notify.js';
+import { addPhotos, connect, deletePhotos, friendly, listCategories } from './github.js?v=20261124';
+import { folderName, photoName, prepare } from './image.js?v=20261124';
+import { initReminders } from './notify.js?v=20261124';
 
 const $ = (id) => document.getElementById(id);
 const STORAGE_KEY = 'gt_admin_cfg';
