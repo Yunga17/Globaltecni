@@ -1,3 +1,11 @@
 {
-  "devices": []
+  "devices": [
+    {
+      "id": "9597d3df-0e75-429e-a324-13704dd8a6af",
+      "k": "mVbzdr73GUMgpK2NgCdDT54j+krNpduIzpW0fxdwU25mbbMQfWq8VWG2kcEnrvIPof4gG7KFddVAcLQnw5RkxiKGGilyeDU2qHJBWsGCpfULEaqCWSPlhhgNgxqPrHYkvVlGtUEnGJjPJcfLeoLvwn8Dexvu1XweA0wrMr+CT4+6MaEc4OyLf4WgyW16dD1fkeflebk7J47PN9NbDHpHBvTJ2TOf8XmIgquuCljQP/FQzHxuLMg5MFJZoEohyFE3e1LC5Bpa02ecnd+uqJrYNDk1MMQ++LGw5eJsG1QEqNC6EzuAV4VgJajtPQUBM5NWK3aIrrkRXXnV9kadYo7z3A==",
+      "iv": "6nZSh85sRW4IuwxE",
+      "d": "/GKlFxjxazBATn86AR6ESuGXM1xjD67pVjX1BE3KyGWYck0rRDNVGIB0Nv+nQ8sUNTxjQzDCM+9H6+Q+tNoqj75Mro/du2If+mAfXXdsqpIEZFy57mHvqwnYZSFh3nbwJryC4Qf0m187bf7h/MzAHhfEQ1Fe/vdrrAU61KwSKaoLGZdG07VotQeJ8M+TF7KRik84wretUCRnLMAUbbjnDT/Yo0q7cfEkTph5vN5/j3r0Pu7gfMFWUX+oa+Op53AgF6yBivV8wzsM9qw7qARiLHJsGbI07ZG9SiAXj/z/cfdeCI8RIn4tsM4ixSE/SeQ0KhFKQb2G3r3g7kMSQjcxiprvReISun4FE/Y7+um2HCNWQiB0MB62nBBxBqDNMsJxENp3sutsFeqkBXtF/UbcabDhCa8/PItpizHT58BODyxCpKiEB2E+DDKpS/w5rsznieeo/gcICJyO2Xz0cQ1mjWbYlY3JtNcI1z+bOkdXqE046olucViM3eWPXb6z",
+      "t": "2026-11-24"
+    }
+  ]
 }
