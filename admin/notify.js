@@ -1,4 +1,4 @@
-// Recordatorios diarios (10:00 y 16:00) con notificaciones push.
+// Recordatorios de lunes a viernes (10:00 y 16:00) con notificaciones push.
 //
 // Cómo funciona:
 //  1. Al activar, el teléfono pide permiso y crea una "suscripción" push.
@@ -6,7 +6,7 @@
 //  3. Una acción programada de GitHub (.github/workflows/recordatorios.yml) la descifra a esas horas
 //     y envía la notificación. Solo esa acción tiene la clave para descifrar.
 
-import { removeDevice, saveDevice } from './github.js?v=20261124';
+import { removeDevice, saveDevice } from './github.js?v=20261124b';
 
 const VAPID_PUBLIC = 'BKrppfj3DPRxQAGHu_fL1EA5rTg1D7sNRWpHB3TRWTtOGGEpO2v-xEUX6y-o5jjnK5sD7B8HC-uknvPyQnCMIY8';
 const RSA_PUBLIC =
@@ -96,7 +96,7 @@ export function initReminders(ctx) {
       const r = await registration();
       const sub = await r.pushManager.getSubscription();
       const on = !!sub && !!loadState().id;
-      render(on, on ? 'Activados: todos los días a las 10:00 y a las 16:00.' : 'Desactivados.');
+      render(on, on ? 'Activados: de lunes a viernes a las 10:00 y a las 16:00.' : 'Desactivados.');
     } catch {
       render(false, 'Desactivados.');
     }
@@ -117,7 +117,7 @@ export function initReminders(ctx) {
     const id = state.id || crypto.randomUUID();
     await saveDevice(cfg, { id, ...(await encrypt(sub.toJSON())), t: new Date().toISOString().slice(0, 10) });
     saveState({ id });
-    ctx.notice('ok', '¡Listo! Recibirás un recordatorio todos los días a las 10:00 y a las 16:00.');
+    ctx.notice('ok', '¡Listo! Recibirás un recordatorio de lunes a viernes a las 10:00 y a las 16:00.');
   }
 
   async function disable() {

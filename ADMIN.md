@@ -20,7 +20,7 @@ por si hubiera que recuperarlas.) Una foto recién subida aparece con su nombre 
 **Instalarla como app (opcional):** en el celular, menú del navegador → *Agregar a la pantalla de inicio*
 (iPhone: botón compartir → *Agregar a inicio*).
 
-**Recordatorios:** al final de la pantalla, el interruptor **Recordatorios** activa un aviso diario a las 10:00 y a las 16:00
+**Recordatorios:** al final de la pantalla, el interruptor **Recordatorios** activa un aviso de lunes a viernes a las 10:00 y a las 16:00
 ("No se olvide de documentar sus trabajos subiendo las fotos"). Se activa o desactiva en cada teléfono por separado.
 Al activarlo, el teléfono pregunta si se permiten notificaciones: hay que tocar **Permitir**.
 En iPhone solo funciona con la app instalada en la pantalla de inicio (iOS 16.4 o más nuevo) y abierta desde ahí.
@@ -29,7 +29,7 @@ En iPhone solo funciona con la app instalada en la pantalla de inicio (iOS 16.4 
 
 - Al activar, el teléfono queda anotado **cifrado** en `notificaciones/dispositivos.json` (el repositorio es público,
   así que nadie más puede leerlo ni usarlo).
-- La acción `.github/workflows/recordatorios.yml` corre a las 10:00 y 16:00 (hora de Ecuador) y envía el aviso.
+- La acción `.github/workflows/recordatorios.yml` corre de lunes a viernes a las 10:00 y 16:00 (hora de Ecuador) y envía el aviso.
   GitHub a veces la arranca con unos minutos de demora.
 - Necesita el secreto **`PUSH_SECRET`** en GitHub → *Settings → Secrets and variables → Actions*. Sin él la acción falla
   y no se envía nada. Si se pierde, hay que generar claves nuevas (y volver a activar los recordatorios en cada teléfono).

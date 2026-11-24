@@ -5,8 +5,8 @@ name: Recordatorios de fotos
 
 on:
   schedule:
-    - cron: '55 14 * * *' # ~10:00 en Ecuador
-    - cron: '55 20 * * *' # ~16:00 en Ecuador
+    - cron: '55 14 * * 1-5' # ~10:00 en Ecuador, de lunes a viernes
+    - cron: '55 20 * * 1-5' # ~16:00 en Ecuador, de lunes a viernes
   workflow_dispatch:
     inputs:
       mensaje:
