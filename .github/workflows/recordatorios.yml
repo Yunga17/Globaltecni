@@ -1,0 +1,44 @@
+# Envía el recordatorio "suba las fotos" a los teléfonos que lo activaron en /admin/.
+# Ecuador es UTC-5 (sin horario de verano). Se programa unos minutos antes porque
+# GitHub suele arrancar las tareas programadas con algo de demora.
+name: Recordatorios de fotos
+
+on:
+  schedule:
+    - cron: '55 14 * * *' # ~10:00 en Ecuador
+    - cron: '55 20 * * *' # ~16:00 en Ecuador
+  workflow_dispatch:
+    inputs:
+      mensaje:
+        description: 'Mensaje de prueba (opcional)'
+        required: false
+
+permissions:
+  contents: write
+
+concurrency: recordatorios
+
+jobs:
+  enviar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar web-push
+        run: npm install --no-save --no-package-lock --prefix .github/scripts web-push@3.6.7
+      - name: Enviar notificaciones
+        run: node .github/scripts/recordatorios.mjs
+        env:
+          PUSH_SECRET: ${{ secrets.PUSH_SECRET }}
+          MENSAJE: ${{ github.event.inputs.mensaje }}
+      - name: Quitar teléfonos que ya no reciben
+        run: |
+          if ! git diff --quiet -- notificaciones/dispositivos.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Quitar teléfonos que ya no reciben recordatorios" -- notificaciones/dispositivos.json
+            git push
+          fi

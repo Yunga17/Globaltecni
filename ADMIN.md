@@ -20,6 +20,24 @@ por si hubiera que recuperarlas.) Una foto recién subida aparece con su nombre 
 **Instalarla como app (opcional):** en el celular, menú del navegador → *Agregar a la pantalla de inicio*
 (iPhone: botón compartir → *Agregar a inicio*).
 
+**Recordatorios:** al final de la pantalla, el interruptor **Recordatorios** activa un aviso diario a las 10:00 y a las 16:00
+("No se olvide de documentar sus trabajos subiendo las fotos"). Se activa o desactiva en cada teléfono por separado.
+Al activarlo, el teléfono pregunta si se permiten notificaciones: hay que tocar **Permitir**.
+En iPhone solo funciona con la app instalada en la pantalla de inicio (iOS 16.4 o más nuevo) y abierta desde ahí.
+
+### Cómo funcionan los recordatorios (para quien administra)
+
+- Al activar, el teléfono queda anotado **cifrado** en `notificaciones/dispositivos.json` (el repositorio es público,
+  así que nadie más puede leerlo ni usarlo).
+- La acción `.github/workflows/recordatorios.yml` corre a las 10:00 y 16:00 (hora de Ecuador) y envía el aviso.
+  GitHub a veces la arranca con unos minutos de demora.
+- Necesita el secreto **`PUSH_SECRET`** en GitHub → *Settings → Secrets and variables → Actions*. Sin él la acción falla
+  y no se envía nada. Si se pierde, hay que generar claves nuevas (y volver a activar los recordatorios en cada teléfono).
+- Para probar sin esperar: GitHub → *Actions → Recordatorios de fotos → Run workflow* (se puede escribir un mensaje).
+- **GitHub pausa las acciones programadas si el repositorio pasa 60 días sin cambios.** Subir o borrar fotos cuenta como cambio.
+  Si se pausa, GitHub avisa por correo y se reactiva en *Actions → Recordatorios de fotos → Enable workflow*.
+- Los teléfonos que desinstalan la app o quitan el permiso se borran solos de la lista.
+
 ## Conexión: se hace una sola vez, por quien administra el sitio
 
 Necesita un *token* de GitHub. Se crea y se pega en el celular del cliente una sola vez, y el cliente no vuelve a verlo.

@@ -128,6 +128,22 @@
           <p id="existing-empty" class="hint" hidden>Esta categoría no tiene fotos.</p>
           <button id="btn-delete" class="btn danger mt" type="button" disabled>Borrar</button>
         </section>
+
+        <!-- Recordatorios (notificaciones a las 10:00 y 16:00) -->
+        <section class="reminder" aria-labelledby="rem-title">
+          <div class="reminder-row">
+            <span class="reminder-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
+            </span>
+            <div class="reminder-text">
+              <p id="rem-title" class="reminder-title">Recordatorios</p>
+              <p class="reminder-sub">Aviso diario a las 10:00 y 16:00 para subir las fotos de los trabajos.</p>
+            </div>
+            <button id="rem-switch" class="switch" type="button" role="switch" aria-checked="false" aria-labelledby="rem-title"></button>
+          </div>
+          <p id="rem-status" class="hint" aria-live="polite"></p>
+          <button id="rem-test" class="link-btn" type="button" hidden>Enviar una notificación de prueba</button>
+        </section>
       </main>
 
       <footer class="foot"><a href="../">Ver la página</a></footer>

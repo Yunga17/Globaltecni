@@ -206,3 +206,51 @@ export async function deletePhotos(c, dir, files) {
   }
   throw last;
 }
+
+// --- Recordatorios: lista de teléfonos que reciben notificaciones ---
+// Cada teléfono se guarda CIFRADO (solo la acción programada de GitHub puede leerlo),
+// porque el repositorio es público.
+const DEVICES_PATH = 'notificaciones/dispositivos.json';
+
+async function changeDevices(c, change, message) {
+  let last;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      let sha;
+      let list = { devices: [] };
+      try {
+        const f = await gh(c, 'GET', `${repoUrl(c)}/contents/${DEVICES_PATH}?ref=${encodeURIComponent(c.branch)}`);
+        sha = f.sha;
+        const parsed = JSON.parse(b64ToUtf8(f.content));
+        if (parsed && Array.isArray(parsed.devices)) list = parsed;
+      } catch (e) {
+        if (!(e instanceof GhError && e.status === 404)) throw e;
+      }
+      const before = JSON.stringify(list.devices);
+      list.devices = change(list.devices);
+      if (JSON.stringify(list.devices) === before) return;
+      await gh(c, 'PUT', `${repoUrl(c)}/contents/${DEVICES_PATH}`, {
+        message,
+        content: utf8ToB64(JSON.stringify(list, null, 2) + '\n'),
+        branch: c.branch,
+        ...(sha ? { sha } : {}),
+      });
+      return;
+    } catch (e) {
+      last = e;
+      if (!(e instanceof GhError) || ![409, 422].includes(e.status)) throw e;
+      await new Promise((r) => setTimeout(r, 900 * (attempt + 1)));
+    }
+  }
+  throw last;
+}
+
+/** Guarda (o actualiza) este teléfono: entry = { id, k, iv, d, t } */
+export function saveDevice(c, entry) {
+  return changeDevices(c, (list) => [...list.filter((x) => x.id !== entry.id), entry], 'Activar recordatorios en un teléfono');
+}
+
+/** Quita este teléfono de la lista. */
+export function removeDevice(c, id) {
+  return changeDevices(c, (list) => list.filter((x) => x.id !== id), 'Desactivar recordatorios en un teléfono');
+}

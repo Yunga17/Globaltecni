@@ -1,5 +1,6 @@
 import { addPhotos, connect, deletePhotos, friendly, listCategories } from './github.js';
 import { folderName, photoName, prepare } from './image.js';
+import { initReminders } from './notify.js';
 
 const $ = (id) => document.getElementById(id);
 const STORAGE_KEY = 'gt_admin_cfg';
@@ -430,3 +431,4 @@ $('btn-upload').addEventListener('click', async () => {
 /* ───── Inicio ───── */
 show();
 if (cfg) refresh();
+initReminders({ getCfg: () => cfg, notice, fail });
