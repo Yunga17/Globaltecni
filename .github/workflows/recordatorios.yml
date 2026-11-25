@@ -5,6 +5,10 @@
 # UNA sola vez por horario (lo anota en notificaciones/enviados.json) y nunca fuera
 # de esas horas. Ecuador es UTC-5 (sin horario de verano):
 #   15:00–16:59 UTC = 10:00–11:59 en Ecuador     21:00–22:59 UTC = 16:00–17:59 en Ecuador
+#
+# El aviso principal lo dispara cron-job.org a las 10:00 y 16:00 (llama a esta acción con
+# origen = "reloj", que respeta el horario). Lo programado aquí abajo queda como respaldo.
+# Al lanzarla a mano desde GitHub (origen = "manual") envía siempre, para probar.
 name: Recordatorios de fotos
 
 on:
@@ -16,6 +20,10 @@ on:
       mensaje:
         description: 'Mensaje de prueba (opcional)'
         required: false
+      origen:
+        description: 'manual = enviar ya (prueba) · reloj = solo si es la hora del recordatorio'
+        required: false
+        default: manual
 
 permissions:
   contents: write
@@ -35,7 +43,7 @@ jobs:
         id: check
         run: node .github/scripts/recordatorios.mjs --check
         env:
-          FORZAR: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
+          FORZAR: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.origen != 'reloj' && '1' || '0' }}
       - name: Instalar web-push
         if: steps.check.outputs.send == 'true'
         run: npm install --no-save --no-package-lock --prefix .github/scripts web-push@3.6.7
@@ -45,7 +53,7 @@ jobs:
         env:
           PUSH_SECRET: ${{ secrets.PUSH_SECRET }}
           MENSAJE: ${{ github.event.inputs.mensaje }}
-          FORZAR: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
+          FORZAR: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.origen != 'reloj' && '1' || '0' }}
       - name: Guardar envío y quitar teléfonos que ya no reciben
         if: steps.check.outputs.send == 'true'
         run: |
