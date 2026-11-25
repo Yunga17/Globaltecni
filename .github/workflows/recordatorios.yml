@@ -1,12 +1,16 @@
 # Envía el recordatorio "suba las fotos" a los teléfonos que lo activaron en /admin/.
-# Ecuador es UTC-5 (sin horario de verano). Se programa unos minutos antes porque
-# GitHub suele arrancar las tareas programadas con algo de demora.
+#
+# GitHub a veces atrasa horas o se salta las tareas programadas. Por eso no se programa
+# una sola vez, sino cada 15 minutos durante 2 horas en cada horario. El script envía
+# UNA sola vez por horario (lo anota en notificaciones/enviados.json) y nunca fuera
+# de esas horas. Ecuador es UTC-5 (sin horario de verano):
+#   15:00–16:59 UTC = 10:00–11:59 en Ecuador     21:00–22:59 UTC = 16:00–17:59 en Ecuador
 name: Recordatorios de fotos
 
 on:
   schedule:
-    - cron: '55 14 * * 1-5' # ~10:00 en Ecuador, de lunes a viernes
-    - cron: '55 20 * * 1-5' # ~16:00 en Ecuador, de lunes a viernes
+    - cron: '3,18,33,48 15,16 * * 1-5' # mañana, de lunes a viernes
+    - cron: '3,18,33,48 21,22 * * 1-5' # tarde, de lunes a viernes
   workflow_dispatch:
     inputs:
       mensaje:
@@ -27,18 +31,29 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: ¿Toca enviar?
+        id: check
+        run: node .github/scripts/recordatorios.mjs --check
+        env:
+          FORZAR: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
       - name: Instalar web-push
+        if: steps.check.outputs.send == 'true'
         run: npm install --no-save --no-package-lock --prefix .github/scripts web-push@3.6.7
       - name: Enviar notificaciones
+        if: steps.check.outputs.send == 'true'
         run: node .github/scripts/recordatorios.mjs
         env:
           PUSH_SECRET: ${{ secrets.PUSH_SECRET }}
           MENSAJE: ${{ github.event.inputs.mensaje }}
-      - name: Quitar teléfonos que ya no reciben
+          FORZAR: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
+      - name: Guardar envío y quitar teléfonos que ya no reciben
+        if: steps.check.outputs.send == 'true'
         run: |
-          if ! git diff --quiet -- notificaciones/dispositivos.json; then
+          git add notificaciones/
+          if ! git diff --cached --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git commit -m "Quitar teléfonos que ya no reciben recordatorios" -- notificaciones/dispositivos.json
+            git commit -m "Recordatorio enviado"
+            git pull --rebase --quiet
             git push
           fi

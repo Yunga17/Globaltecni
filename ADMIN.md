@@ -30,7 +30,8 @@ En iPhone solo funciona con la app instalada en la pantalla de inicio (iOS 16.4 
 - Al activar, el teléfono queda anotado **cifrado** en `notificaciones/dispositivos.json` (el repositorio es público,
   así que nadie más puede leerlo ni usarlo).
 - La acción `.github/workflows/recordatorios.yml` corre de lunes a viernes a las 10:00 y 16:00 (hora de Ecuador) y envía el aviso.
-  GitHub a veces la arranca con unos minutos de demora.
+  Como GitHub a veces atrasa o se salta las tareas programadas, lo intenta cada 15 minutos entre las 10:00–12:00 y
+  las 16:00–18:00 y envía una sola vez por horario (lo anota en `notificaciones/enviados.json`). Nunca avisa fuera de esas horas.
 - Necesita el secreto **`PUSH_SECRET`** en GitHub → *Settings → Secrets and variables → Actions*. Sin él la acción falla
   y no se envía nada. Si se pierde, hay que generar claves nuevas (y volver a activar los recordatorios en cada teléfono).
 - Para probar sin esperar: GitHub → *Actions → Recordatorios de fotos → Run workflow* (se puede escribir un mensaje).

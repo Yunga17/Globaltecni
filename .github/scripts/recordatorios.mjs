@@ -1,11 +1,54 @@
-// Lo ejecuta .github/workflows/recordatorios.yml a las 10:00 y 16:00 (hora de Ecuador).
-// Descifra los teléfonos guardados en notificaciones/dispositivos.json y les envía el recordatorio.
+// Lo ejecuta .github/workflows/recordatorios.yml de lunes a viernes, cada 15 minutos entre
+// las 10:00–12:00 y las 16:00–18:00 (hora de Ecuador), porque GitHub a veces atrasa o se salta
+// las tareas programadas. Envía UNA sola vez por horario: anota el último envío en
+// notificaciones/enviados.json. Fuera de esas horas no envía nada (para no avisar de noche).
+//
+//   node recordatorios.mjs --check   → solo dice si toca enviar (sin dependencias)
+//   node recordatorios.mjs           → envía (FORZAR=1 envía siempre, para pruebas manuales)
 import { createDecipheriv, privateDecrypt, constants } from 'node:crypto';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, appendFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 
 const FILE = 'notificaciones/dispositivos.json';
+const SENT_FILE = 'notificaciones/enviados.json';
+
+/** Hora de Ecuador: { date: 'AAAA-MM-DD', weekday: 1..7 (lunes=1), hour } */
+function ecuador(now) {
+  const p = Object.fromEntries(
+    new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Guayaquil', year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', hour12: false, weekday: 'short' })
+      .formatToParts(now)
+      .map((x) => [x.type, x.value]),
+  );
+  const weekday = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].indexOf(p.weekday) + 1;
+  return { date: `${p.year}-${p.month}-${p.day}`, weekday, hour: Number(p.hour) % 24 };
+}
+
+/** Horario que toca ahora ('AAAA-MM-DD-manana' / '-tarde'), o null si no es hora de avisar. */
+export function slot(now = new Date()) {
+  const e = ecuador(now);
+  if (e.weekday > 5) return null;
+  if (e.hour >= 10 && e.hour < 12) return `${e.date}-manana`;
+  if (e.hour >= 16 && e.hour < 18) return `${e.date}-tarde`;
+  return null;
+}
+
+function lastSent() {
+  try {
+    return JSON.parse(readFileSync(SENT_FILE, 'utf8')).ultimo || '';
+  } catch {
+    return '';
+  }
+}
+
+/** ¿Toca enviar ahora? { send, reason } */
+export function shouldSend(now = new Date(), forced = false) {
+  if (forced) return { send: true, reason: 'envío manual' };
+  const s = slot(now);
+  if (!s) return { send: false, reason: 'fuera del horario de recordatorios' };
+  if (lastSent() === s) return { send: false, reason: `ya se envió el de ${s}` };
+  return { send: true, reason: `toca enviar el de ${s}` };
+}
 
 /** Descifra lo que cifró admin/notify.js (RSA-OAEP SHA-256 + AES-256-GCM). */
 export function decrypt(entry, rsaPrivate) {
@@ -26,15 +69,28 @@ export function message(now = new Date()) {
 }
 
 async function main() {
+  const forced = process.env.FORZAR === '1';
+  const decision = shouldSend(new Date(), forced);
+  console.log(`Recordatorio: ${decision.reason}.`);
+  if (process.argv.includes('--check')) {
+    if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `send=${decision.send}\n`);
+    return;
+  }
+  if (!decision.send) return;
+  const currentSlot = forced ? null : slot();
+  const markSent = () => currentSlot && writeFileSync(SENT_FILE, JSON.stringify({ ultimo: currentSlot }, null, 2) + '\n');
+
   if (!process.env.PUSH_SECRET) {
     console.error('Falta el secreto PUSH_SECRET en GitHub (Settings → Secrets and variables → Actions).');
     process.exit(1);
   }
   const secret = JSON.parse(process.env.PUSH_SECRET);
-  if (!existsSync(FILE)) return console.log('Ningún teléfono tiene los recordatorios activados.');
-  const list = JSON.parse(readFileSync(FILE, 'utf8'));
+  const list = existsSync(FILE) ? JSON.parse(readFileSync(FILE, 'utf8')) : { devices: [] };
   const devices = Array.isArray(list.devices) ? list.devices : [];
-  if (!devices.length) return console.log('Ningún teléfono tiene los recordatorios activados.');
+  if (!devices.length) {
+    markSent();
+    return console.log('Ningún teléfono tiene los recordatorios activados.');
+  }
 
   const webpush = createRequire(new URL('./', import.meta.url))('web-push');
   webpush.setVapidDetails(secret.subject, secret.vapidPublic, secret.vapidPrivate);
@@ -54,6 +110,8 @@ async function main() {
     }
   }
   console.log(`Enviadas: ${ok} de ${devices.length}.`);
+  // Si no llegó a ninguno (falla de red, etc.), no se anota: se reintenta en el siguiente intento
+  if (ok > 0 || gone.size === devices.length) markSent();
   if (gone.size) {
     list.devices = devices.filter((d) => !gone.has(d.id));
     writeFileSync(FILE, JSON.stringify(list, null, 2) + '\n');
